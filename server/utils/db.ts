@@ -1,8 +1,35 @@
 import { Pool } from "pg"
+import { logError, logInfo, serializeError } from "./logger"
 
 let pool: Pool | null = null
 
 let schemaReadyPromise: Promise<void> | null = null
+
+const getConnectionString = () => process.env.DATABASE_URL?.trim() || process.env.POSTGRES_URL?.trim() || ""
+
+const isLocalConnection = (connectionString: string) => {
+  return /localhost|127\.0\.0\.1/i.test(connectionString)
+}
+
+const shouldUseSsl = (connectionString: string) => {
+  const forceDisableSsl = process.env.DATABASE_SSL === "false" || process.env.PGSSLMODE === "disable"
+
+  if (forceDisableSsl) {
+    return false
+  }
+
+  if (/[?&]sslmode=disable/i.test(connectionString)) {
+    return false
+  }
+
+  const forceEnableSsl = process.env.DATABASE_SSL === "true" || process.env.PGSSLMODE === "require" || /[?&]sslmode=require/i.test(connectionString)
+
+  if (forceEnableSsl) {
+    return true
+  }
+
+  return !isLocalConnection(connectionString)
+}
 
 const createSchema = async () => {
   const database = getPool()
@@ -63,17 +90,39 @@ const getPool = () => {
     return pool
   }
 
-  const connectionString = process.env.POSTGRES_URL?.trim() || process.env.DATABASE_URL?.trim() || ""
+  const connectionString = getConnectionString()
 
   if (!connectionString) {
-    throw new Error("Environment variable POSTGRES_URL atau DATABASE_URL wajib diisi untuk menjalankan aplikasi.")
+    throw new Error("Environment variable DATABASE_URL atau POSTGRES_URL wajib diisi untuk menjalankan aplikasi.")
   }
 
   pool = new Pool({
-    connectionString
+    connectionString,
+    ssl: shouldUseSsl(connectionString) ? { rejectUnauthorized: false } : undefined
+  })
+
+  pool.on("error", (error) => {
+    logError("PostgreSQL pool error", {
+      error: serializeError(error)
+    })
+  })
+
+  logInfo("PostgreSQL pool initialized", {
+    sslEnabled: shouldUseSsl(connectionString)
   })
 
   return pool
+}
+
+export const isDatabaseConfigured = () => Boolean(getConnectionString())
+
+export const testDatabaseConnection = async () => {
+  const result = await query<{ now: string }>("SELECT NOW()::text AS now")
+
+  return {
+    connected: true,
+    databaseTime: result.rows[0]?.now || null
+  }
 }
 
 export const ensureDatabase = async () => {

@@ -146,6 +146,35 @@ const getCourseInsights = (records: ReturnType<typeof toRecord>[]): CourseInsigh
   })
 }
 
+export const createSafeAttendancePayload = (): AttendancePayload => {
+  const { date, time, dayName } = getWitaParts()
+  const todaySchedules = COURSE_SCHEDULES.filter((schedule) => schedule.day === dayName)
+
+  return {
+    records: [],
+    schedules: COURSE_SCHEDULES,
+    faculties: FACULTIES,
+    todayDate: date,
+    currentDayName: dayName,
+    timezone: "WITA (UTC+08:00)",
+    currentWitaTime: time,
+    courseInsights: getCourseInsights([]),
+    todaySchedules,
+    activeSession: null,
+    summary: {
+      total: 0,
+      hadir: 0,
+      terlambat: 0,
+      uniqueStudents: 0,
+      activeFaculties: 0,
+      latestDate: "-",
+      todayTotal: 0,
+      hadirToday: 0,
+      lateToday: 0
+    }
+  }
+}
+
 export const getAttendancePayload = async (): Promise<AttendancePayload> => {
   const rowsResult = await query(`
     SELECT id, employee_name, employee_id, department, course_key, course_label, cutoff_time, attendance_date, check_in_time, status, notes, created_at

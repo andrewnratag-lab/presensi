@@ -1,10 +1,11 @@
 import { getQuery, setHeader } from "h3"
 import { getAttendancePayload } from "../../utils/attendance"
+import { withApiHandler } from "../../utils/api"
 import { requireUser } from "../../utils/auth"
 
 const toCsvCell = (value: string | number) => `"${String(value).replaceAll('"', '""')}"`
 
-export default defineEventHandler(async (event) => {
+export default withApiHandler(async (event) => {
   requireUser(event)
   const query = getQuery(event)
   const courseKey = String(query.courseKey || "")
@@ -39,4 +40,6 @@ export default defineEventHandler(async (event) => {
   setHeader(event, "Content-Disposition", `attachment; filename="rekap-presensi-${attendanceDate || "semua"}.csv"`)
 
   return `\uFEFF${rows.map((row) => row.map(toCsvCell).join(",")).join("\n")}`
+}, {
+  route: "export.attendance.csv.get"
 })

@@ -1,13 +1,12 @@
-import { getAttendancePayload } from "../utils/attendance"
+import { createSafeAttendancePayload, getAttendancePayload } from "../utils/attendance"
 import { withApiHandler } from "../utils/api"
 import { requireUser } from "../utils/auth"
-import { createSafeAttendancePayload } from "../utils/attendance"
 
 export default withApiHandler(async (event) => {
   requireUser(event)
   return await getAttendancePayload()
 }, {
-  route: "attendance.get",
+  route: "dashboard.get",
   fallback: () => ({
     ...createSafeAttendancePayload(),
     error: true

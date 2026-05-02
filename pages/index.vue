@@ -14,6 +14,31 @@ const successMessage = ref("")
 const isEditing = ref(false)
 const REQUEST_TIMEOUT_MS = 8000
 
+const createDashboardFallback = (): AttendancePayload & { error: true } => ({
+  records: [],
+  schedules: [],
+  faculties: [],
+  todayDate: "",
+  currentDayName: "",
+  timezone: "WITA (UTC+08:00)",
+  currentWitaTime: "--:--",
+  courseInsights: [],
+  todaySchedules: [],
+  activeSession: null,
+  summary: {
+    total: 0,
+    hadir: 0,
+    terlambat: 0,
+    uniqueStudents: 0,
+    activeFaculties: 0,
+    latestDate: "-",
+    todayTotal: 0,
+    hadirToday: 0,
+    lateToday: 0
+  },
+  error: true
+})
+
 const historyQuery = ref("")
 const historyStatus = ref<AttendanceStatus | "semua">("semua")
 const historyDate = ref("")
@@ -122,6 +147,16 @@ const clearFilters = () => {
   historyCourse.value = "semua"
 }
 
+async function fetchDashboard() {
+  try {
+    return await $fetch<AttendancePayload>("/api/dashboard", {
+      timeout: REQUEST_TIMEOUT_MS
+    })
+  } catch {
+    return createDashboardFallback()
+  }
+}
+
 const loadAttendance = async () => {
   errorMessage.value = ""
 
@@ -135,9 +170,11 @@ const loadAttendance = async () => {
       return
     }
 
-    attendance.value = await $fetch<AttendancePayload>("/api/attendance", {
-      timeout: REQUEST_TIMEOUT_MS
-    })
+    attendance.value = await fetchDashboard()
+
+    if ((attendance.value as (AttendancePayload & { error?: boolean }) | null)?.error) {
+      errorMessage.value = "Data dashboard sedang memakai fallback aman karena layanan backend atau database bermasalah."
+    }
 
     if (!form.attendanceDate) {
       form.attendanceDate = attendance.value.todayDate

@@ -1,4 +1,13 @@
 <script setup lang="ts">
+interface MataKuliahItem {
+  id: number
+  nama: string
+  sks: number
+  kelas: string
+  dosen: string
+  jadwal: string
+}
+
 const route = useRoute()
 const token = computed(() => String(route.query.token || ""))
 const loading = ref(true)
@@ -6,29 +15,52 @@ const saving = ref(false)
 const errorMessage = ref("")
 const successMessage = ref("")
 const sessionData = ref<{ session: any; faculties: string[] } | null>(null)
+const mataKuliah = ref<MataKuliahItem[]>([])
 const REQUEST_TIMEOUT_MS = 8000
 
 const form = reactive({
   studentName: "",
   studentId: "",
   faculty: "",
+  courseKey: "",
   notes: ""
 })
 
 const fixedFaculty = "Ilmu Pendidikan Kristen"
+
+const syncSelectedCourse = () => {
+  if (!mataKuliah.value.length) {
+    form.courseKey = ""
+    return
+  }
+
+  const sessionCourseLabel = String(sessionData.value?.session?.courseLabel || "").trim().toLowerCase()
+  const matchedCourse = mataKuliah.value.find((item) => item.nama.toLowerCase() === sessionCourseLabel)
+
+  form.courseKey = matchedCourse?.nama || mataKuliah.value[0].nama
+}
 
 const loadSession = async () => {
   loading.value = true
   errorMessage.value = ""
 
   try {
-    sessionData.value = await $fetch("/api/checkin", {
-      timeout: REQUEST_TIMEOUT_MS,
-      query: {
-        token: token.value
-      }
-    })
+    const [sessionResponse, mataKuliahResponse] = await Promise.all([
+      $fetch("/api/checkin", {
+        timeout: REQUEST_TIMEOUT_MS,
+        query: {
+          token: token.value
+        }
+      }),
+      $fetch<MataKuliahItem[]>("/api/matkul", {
+        timeout: REQUEST_TIMEOUT_MS
+      })
+    ])
+
+    sessionData.value = sessionResponse
+    mataKuliah.value = mataKuliahResponse
     form.faculty = fixedFaculty
+    syncSelectedCourse()
   } catch (error: any) {
     errorMessage.value = error?.data?.statusMessage || "Sesi check-in tidak tersedia."
   } finally {
@@ -53,6 +85,7 @@ const submitCheckIn = async () => {
     form.studentName = ""
     form.studentId = ""
     form.faculty = fixedFaculty
+    syncSelectedCourse()
     form.notes = ""
   } catch (error: any) {
     errorMessage.value = error?.data?.statusMessage || "Check-in gagal."
@@ -90,11 +123,23 @@ await loadSession()
             <span>Fakultas</span>
             <input v-model="form.faculty" type="text" readonly>
           </label>
+          <label class="field">
+            <span>Mata Kuliah</span>
+            <select v-model="form.courseKey">
+              <option v-for="mk in mataKuliah" :key="mk.id" :value="mk.nama">
+                {{ mk.nama }} - {{ mk.dosen }}
+              </option>
+            </select>
+          </label>
           <label class="field field-wide">
             <span>Catatan</span>
             <input v-model="form.notes" type="text">
           </label>
         </div>
+
+        <p class="helper-text">
+          Daftar mata kuliah diambil dari data statis agar tetap berjalan di Vercel. Sesi check-in aktif tetap menentukan mata kuliah presensi yang disimpan.
+        </p>
 
         <div class="action-row">
           <button class="button-primary" :disabled="saving" @click="submitCheckIn">

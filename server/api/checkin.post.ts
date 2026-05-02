@@ -1,7 +1,8 @@
 import { readBody } from "h3"
 import { createAttendanceRecord, getCheckInSessionByToken } from "../utils/attendance"
+import { withApiHandler } from "../utils/api"
 
-export default defineEventHandler(async (event) => {
+export default withApiHandler(async (event) => {
   const body = await readBody(event)
   const token = body?.token?.trim?.() || ""
   const session = await getCheckInSessionByToken(token)
@@ -14,4 +15,6 @@ export default defineEventHandler(async (event) => {
     attendanceDate: session.attendanceDate,
     notes: body?.notes
   })
+}, {
+  route: "checkin.post"
 })

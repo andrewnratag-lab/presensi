@@ -1,8 +1,9 @@
 import { readBody } from "h3"
 import { closeAttendanceSession, createAttendanceRecord, deleteAttendanceRecord, openAttendanceSession, updateAttendanceRecord } from "../utils/attendance"
+import { withApiHandler } from "../utils/api"
 import { requireUser } from "../utils/auth"
 
-export default defineEventHandler(async (event) => {
+export default withApiHandler(async (event) => {
   requireUser(event)
   const body = await readBody(event)
   const payload = body || {}
@@ -24,4 +25,6 @@ export default defineEventHandler(async (event) => {
   }
 
   return await createAttendanceRecord(payload)
+}, {
+  route: "attendance.post"
 })
