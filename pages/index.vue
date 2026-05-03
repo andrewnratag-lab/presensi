@@ -408,9 +408,9 @@ onBeforeUnmount(() => {
 
     <section class="story-grid">
       <article class="story-card">
-        <span class="story-label">Target Produk</span>
-        <strong>Input presensi kurang dari 15 detik</strong>
-        <p>Admin cukup mengisi identitas mahasiswa dan memilih mata kuliah untuk mencatat kehadiran.</p>
+        <span class="story-label">Rekap Presensi</span>
+        <strong>Lihat laporan dan ekspor data kelas</strong>
+        <p>Buka halaman rekap untuk memfilter presensi per mata kuliah, per tanggal, lalu ekspor CSV atau cetak PDF.</p>
       </article>
       <article class="story-card">
         <span class="story-label">Aturan Kelas</span>
@@ -418,9 +418,9 @@ onBeforeUnmount(() => {
         <p>Jam WITA dibandingkan langsung dengan batas presensi tiap mata kuliah.</p>
       </article>
       <article class="story-card">
-        <span class="story-label">Monitoring</span>
-        <strong>Kondisi kelas langsung terbaca</strong>
-        <p>Dosen atau admin bisa melihat siapa yang hadir dan terlambat dari dashboard utama.</p>
+        <span class="story-label">Logout</span>
+        <strong>Keluar akun dengan cepat dan aman</strong>
+        <p>Gunakan tombol logout di navigasi atas untuk menutup sesi admin setelah selesai mengelola presensi.</p>
       </article>
     </section>
 

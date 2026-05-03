@@ -2,7 +2,6 @@
 import { apiFetch } from "~/composables/useBackendApi"
 
 const route = useRoute()
-const drawerOpen = ref(false)
 const loggingOut = ref(false)
 const authCookie = useCookie<string | null>("presensi_auth")
 
@@ -50,12 +49,6 @@ const iconPaths: Record<string, string> = {
 
 const getIconPath = (icon: string) => iconPaths[icon] || iconPaths.report
 
-const closeDrawer = () => {
-  drawerOpen.value = false
-}
-
-watch(() => route.fullPath, closeDrawer)
-
 const logout = async () => {
   loggingOut.value = true
 
@@ -64,7 +57,6 @@ const logout = async () => {
       method: "POST"
     })
     authCookie.value = null
-    closeDrawer()
     await navigateTo("/login")
   } finally {
     loggingOut.value = false
@@ -111,20 +103,7 @@ const logout = async () => {
       </header>
 
       <div class="admin-quick-nav" aria-label="Navigasi cepat">
-        <div class="admin-operator-card">
-          <div class="admin-brand">
-            <div class="admin-brand-mark">SI</div>
-            <div class="admin-brand-copy">
-              <strong>Panel Operator</strong>
-              <span>{{ currentUser?.name || "Pengguna" }} · {{ currentUser?.role || "admin" }}</span>
-              <small class="admin-brand-status">
-                <span class="admin-brand-status-dot" aria-hidden="true"></span>
-                Sistem aktif
-              </small>
-            </div>
-          </div>
-          <div class="admin-build-chip">{{ uiBuildVersion }}</div>
-        </div>
+        <div class="admin-build-chip">{{ uiBuildVersion }}</div>
 
         <NuxtLink
           v-for="item in navigationItems"
