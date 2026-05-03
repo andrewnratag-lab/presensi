@@ -55,7 +55,7 @@ const login = async () => {
 
         <div class="action-row login-actions">
           <button class="button-primary" :disabled="loading" @click="login">
-            {{ loading ? "Masuk..." : "Masuk ke Sistem" }}
+            {{ loading ? "Masuk..." : "Login" }}
           </button>
         </div>
 

@@ -420,7 +420,7 @@ if (attendance.value) {
         <section class="panel form-panel">
           <div class="section-heading">
             <div>
-              <h2>Form Presensi Mahasiswa</h2>
+              <h2>Presensi Mahasiswa</h2>
               <p class="helper-text">
                 {{ isEditing
                   ? "Perbarui data presensi mahasiswa yang dipilih lalu simpan kembali."
@@ -511,7 +511,7 @@ if (attendance.value) {
         <section class="panel">
           <div class="section-heading">
             <div>
-              <h2>Ringkasan Mata Kuliah Hari Ini</h2>
+              <h2>Mata Kuliah Hari</h2>
               <p class="helper-text">Distribusi presensi per mata kuliah pada tanggal perkuliahan aktif.</p>
             </div>
             <span class="pill">{{ courseInsights.length }} mata kuliah</span>
