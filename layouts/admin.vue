@@ -74,65 +74,8 @@ const logout = async () => {
 
 <template>
   <div class="admin-shell">
-    <aside class="admin-sidebar">
-      <div class="admin-brand">
-        <div class="admin-brand-mark">SI</div>
-        <div class="admin-brand-copy">
-          <strong>Presensi Mahasiswa</strong>
-          <span>Sistem Informasi</span>
-          <small class="admin-brand-status">
-            <span class="admin-brand-status-dot" aria-hidden="true"></span>
-            Sistem aktif
-          </small>
-        </div>
-      </div>
-
-      <nav class="admin-nav" aria-label="Navigasi admin">
-        <NuxtLink
-          v-for="item in navigationItems"
-          :key="item.to"
-          :to="item.to"
-          class="admin-nav-item"
-          :class="{ active: route.path === item.to }"
-        >
-          <span class="admin-nav-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none">
-              <path :d="getIconPath(item.icon)" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </span>
-          <span class="admin-nav-copy">
-            <strong>{{ item.label }}</strong>
-            <small>{{ item.caption }}</small>
-          </span>
-        </NuxtLink>
-      </nav>
-
-      <div class="admin-sidebar-footer">
-        <div class="admin-user-card">
-          <span class="admin-user-role">{{ currentUser?.role || "admin" }}</span>
-          <strong>{{ currentUser?.name || "Pengguna" }}</strong>
-          <small>{{ currentUser?.username || "presensi_auth" }}</small>
-        </div>
-
-        <button class="button-secondary admin-logout-button" :disabled="loggingOut" @click="logout">
-          <span class="admin-nav-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none">
-              <path :d="getIconPath('logout')" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </span>
-          <span>{{ loggingOut ? "Keluar..." : "Logout" }}</span>
-        </button>
-      </div>
-    </aside>
-
     <div class="admin-main">
       <header class="admin-header">
-        <button class="admin-menu-button" type="button" aria-label="Buka menu" @click="drawerOpen = true">
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-
         <div class="admin-header-copy">
           <p class="eyebrow admin-header-eyebrow">Panel Admin</p>
           <strong>{{ activeNavigation.label }}</strong>
@@ -168,7 +111,21 @@ const logout = async () => {
       </header>
 
       <div class="admin-quick-nav" aria-label="Navigasi cepat">
-        <div class="admin-build-chip">{{ uiBuildVersion }}</div>
+        <div class="admin-operator-card">
+          <div class="admin-brand">
+            <div class="admin-brand-mark">SI</div>
+            <div class="admin-brand-copy">
+              <strong>Panel Operator</strong>
+              <span>{{ currentUser?.name || "Pengguna" }} · {{ currentUser?.role || "admin" }}</span>
+              <small class="admin-brand-status">
+                <span class="admin-brand-status-dot" aria-hidden="true"></span>
+                Sistem aktif
+              </small>
+            </div>
+          </div>
+          <div class="admin-build-chip">{{ uiBuildVersion }}</div>
+        </div>
+
         <NuxtLink
           v-for="item in navigationItems"
           :key="`quick-${item.to}`"
@@ -198,62 +155,5 @@ const logout = async () => {
         <slot />
       </div>
     </div>
-
-    <Transition name="admin-drawer">
-      <div v-if="drawerOpen" class="admin-drawer-layer">
-        <button class="admin-drawer-backdrop" type="button" aria-label="Tutup menu" @click="closeDrawer"></button>
-        <aside class="admin-drawer">
-          <div class="admin-brand admin-brand-mobile">
-            <div class="admin-brand-mark">SI</div>
-            <div class="admin-brand-copy">
-              <strong>Presensi Mahasiswa</strong>
-              <span>Sistem Informasi</span>
-              <small class="admin-brand-status">
-                <span class="admin-brand-status-dot" aria-hidden="true"></span>
-                Sistem aktif
-              </small>
-            </div>
-          </div>
-
-          <nav class="admin-nav" aria-label="Navigasi admin mobile">
-            <NuxtLink
-              v-for="item in navigationItems"
-              :key="`mobile-${item.to}`"
-              :to="item.to"
-              class="admin-nav-item"
-              :class="{ active: route.path === item.to }"
-              @click="closeDrawer"
-            >
-              <span class="admin-nav-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path :d="getIconPath(item.icon)" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-              </span>
-              <span class="admin-nav-copy">
-                <strong>{{ item.label }}</strong>
-                <small>{{ item.caption }}</small>
-              </span>
-            </NuxtLink>
-          </nav>
-
-          <div class="admin-sidebar-footer">
-            <div class="admin-user-card">
-              <span class="admin-user-role">{{ currentUser?.role || "admin" }}</span>
-              <strong>{{ currentUser?.name || "Pengguna" }}</strong>
-              <small>{{ currentUser?.username || "presensi_auth" }}</small>
-            </div>
-
-            <button class="button-secondary admin-logout-button" :disabled="loggingOut" @click="logout">
-              <span class="admin-nav-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path :d="getIconPath('logout')" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-              </span>
-              <span>{{ loggingOut ? "Keluar..." : "Logout" }}</span>
-            </button>
-          </div>
-        </aside>
-      </div>
-    </Transition>
   </div>
 </template>
