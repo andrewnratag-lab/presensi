@@ -511,7 +511,7 @@ if (attendance.value) {
         <section class="panel">
           <div class="section-heading">
             <div>
-              <h2>Mata Kuliah Hari</h2>
+              <h2>Mata Kuliah</h2>
               <p class="helper-text">Distribusi presensi per mata kuliah pada tanggal perkuliahan aktif.</p>
             </div>
             <span class="pill">{{ courseInsights.length }} mata kuliah</span>
