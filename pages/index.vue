@@ -631,7 +631,15 @@ onBeforeUnmount(() => {
             <span class="pill">{{ filteredRecords.length }} hasil</span>
           </div>
 
-          <div class="filter-grid">
+          <div class="filter-toolbar">
+            <div class="filter-summary">
+              <div class="filter-summary-chip">Pencarian cepat</div>
+              <div class="filter-summary-chip">Filter aktif {{ historyStatus === "semua" ? "semua status" : historyStatus }}</div>
+              <div class="filter-summary-chip">Tanggal {{ historyDate || "semua" }}</div>
+            </div>
+          </div>
+
+          <div class="filter-grid filter-grid-elevated">
             <label class="field">
               <span>Cari nama atau NIM</span>
               <input v-model="historyQuery" type="text" placeholder="Cari mahasiswa">
@@ -697,13 +705,31 @@ onBeforeUnmount(() => {
                   <td colspan="10" class="empty-state">Belum ada data yang cocok dengan filter.</td>
                 </tr>
                 <tr v-for="record in filteredRecords" :key="record.id">
-                  <td>{{ record.studentName }}</td>
-                  <td>{{ record.studentId || "-" }}</td>
+                  <td>
+                    <div class="table-primary-cell">
+                      <strong>{{ record.studentName }}</strong>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="table-inline-badge">{{ record.studentId || "Tanpa NIM" }}</span>
+                  </td>
                   <td>{{ record.faculty }}</td>
-                  <td>{{ record.courseLabel }}</td>
-                  <td>{{ record.day }}, {{ record.startTime }}-{{ record.endTime }}</td>
+                  <td>
+                    <div class="table-primary-cell">
+                      <strong>{{ record.courseLabel }}</strong>
+                      <small>{{ record.credits }} SKS - kelas {{ record.classGroup }}</small>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="table-primary-cell">
+                      <strong>{{ record.day }}</strong>
+                      <small>{{ record.startTime }}-{{ record.endTime }}</small>
+                    </div>
+                  </td>
                   <td>{{ record.attendanceDate }}</td>
-                  <td>{{ record.checkInTime }} WITA</td>
+                  <td>
+                    <span class="table-inline-badge table-inline-badge-time">{{ record.checkInTime }} WITA</span>
+                  </td>
                   <td><span class="tag" :class="statusClass(record.status)">{{ record.status }}</span></td>
                   <td>{{ record.notes || "-" }}</td>
                   <td>

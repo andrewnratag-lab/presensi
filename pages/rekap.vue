@@ -61,7 +61,28 @@ await loadReport()
         </div>
       </div>
 
-      <div class="filter-grid">
+      <div class="hero-focus-grid rekap-hero-grid">
+        <article class="hero-focus-card">
+          <span class="story-label">Total Data</span>
+          <strong>{{ report?.records?.length ?? 0 }} catatan</strong>
+          <p>Jumlah catatan presensi yang sesuai dengan kombinasi filter laporan saat ini.</p>
+        </article>
+        <article class="hero-focus-card">
+          <span class="story-label">Cakupan Laporan</span>
+          <strong>{{ filters.courseKey ? "Mata kuliah terpilih" : "Semua mata kuliah" }}</strong>
+          <p>{{ filters.attendanceDate ? `Tanggal ${filters.attendanceDate}` : "Semua tanggal presensi" }}</p>
+        </article>
+      </div>
+
+      <div class="filter-toolbar">
+        <div class="filter-summary">
+          <div class="filter-summary-chip">Mode laporan</div>
+          <div class="filter-summary-chip">{{ filters.courseKey ? "Per mata kuliah" : "Lintas mata kuliah" }}</div>
+          <div class="filter-summary-chip">{{ filters.attendanceDate || "Semua tanggal" }}</div>
+        </div>
+      </div>
+
+      <div class="filter-grid filter-grid-elevated">
         <label class="field">
           <span>Mata Kuliah</span>
           <select v-model="filters.courseKey">
@@ -100,11 +121,25 @@ await loadReport()
               <td colspan="7" class="empty-state">Belum ada data rekap untuk filter ini.</td>
             </tr>
             <tr v-for="record in report?.records || []" :key="record.id">
-              <td>{{ record.studentName }}</td>
-              <td>{{ record.studentId }}</td>
+              <td>
+                <div class="table-primary-cell">
+                  <strong>{{ record.studentName }}</strong>
+                </div>
+              </td>
+              <td>
+                <span class="table-inline-badge">{{ record.studentId || "Tanpa NIM" }}</span>
+              </td>
               <td>{{ record.faculty }}</td>
-              <td>{{ record.courseLabel }}</td>
-              <td>{{ record.lecturer }}</td>
+              <td>
+                <div class="table-primary-cell">
+                  <strong>{{ record.courseLabel }}</strong>
+                </div>
+              </td>
+              <td>
+                <div class="table-primary-cell">
+                  <strong>{{ record.lecturer }}</strong>
+                </div>
+              </td>
               <td>{{ record.attendanceDate }}</td>
               <td><span class="tag" :class="record.status === 'hadir' ? 'tepat-waktu' : 'terlambat'">{{ record.status }}</span></td>
             </tr>
