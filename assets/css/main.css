@@ -1486,7 +1486,7 @@ table td:last-child .action-button {
 
 }
 
-@media (max-width: 1040px) {
+@media (max-width: 900px) {
   .admin-shell {
     grid-template-columns: 1fr;
     padding: 16px;
