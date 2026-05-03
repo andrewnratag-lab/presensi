@@ -37,6 +37,9 @@ const currentUser = computed(() => parseCurrentUser())
 const activeNavigation = computed(() => {
   return navigationItems.find((item) => item.to === route.path) || navigationItems[0]
 })
+const reportNavigation = computed(() => {
+  return navigationItems.find((item) => item.to === "/rekap") || navigationItems[1]
+})
 
 const iconPaths: Record<string, string> = {
   home: "M3 10.75 12 3l9 7.75v9.25a1 1 0 0 1-1 1h-5.5v-6.5h-5V21H4a1 1 0 0 1-1-1z",
@@ -135,7 +138,31 @@ const logout = async () => {
           <small>{{ activeNavigation.caption }}</small>
         </div>
 
-        <div class="hero-chip admin-header-chip">{{ currentUser?.role || "admin" }}</div>
+        <div class="admin-header-actions">
+          <NuxtLink
+            :to="reportNavigation.to"
+            class="admin-header-link"
+            :class="{ active: route.path === reportNavigation.to }"
+          >
+            <span class="admin-nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path :d="getIconPath(reportNavigation.icon)" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+            <span>{{ reportNavigation.label }}</span>
+          </NuxtLink>
+
+          <button class="admin-header-logout" :disabled="loggingOut" @click="logout">
+            <span class="admin-nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path :d="getIconPath('logout')" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+            <span>{{ loggingOut ? "Keluar..." : "Logout" }}</span>
+          </button>
+
+          <div class="hero-chip admin-header-chip">{{ currentUser?.role || "admin" }}</div>
+        </div>
       </header>
 
       <div class="admin-content">
