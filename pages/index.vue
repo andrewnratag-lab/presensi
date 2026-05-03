@@ -13,6 +13,8 @@ const saving = ref(false)
 const errorMessage = ref("")
 const successMessage = ref("")
 const isEditing = ref(false)
+const liveWitaTime = ref("--:--:--")
+let liveClockTimer: ReturnType<typeof setInterval> | null = null
 const REQUEST_TIMEOUT_MS = 20000
 
 const createDashboardFallback = (): AttendancePayload & { error: true } => ({
@@ -66,11 +68,24 @@ const activeSession = computed(() => attendance.value?.activeSession ?? null)
 const timezoneLabel = computed(() => attendance.value?.timezone ?? "WITA (UTC+08:00)")
 const todayDate = computed(() => attendance.value?.todayDate ?? "")
 const currentDayName = computed(() => attendance.value?.currentDayName ?? "")
-const currentWitaTime = computed(() => attendance.value?.currentWitaTime ?? "--:--")
+const currentWitaTime = computed(() => liveWitaTime.value)
+const currentWitaMinute = computed(() => currentWitaTime.value.slice(0, 5))
 const selectedCourse = computed(() => schedules.value.find((item) => item.key === form.courseKey) ?? null)
 const courseOptionLabel = (schedule: AttendancePayload["schedules"][number]) => {
   return `${schedule.label} | ${schedule.day}, ${schedule.startTime}-${schedule.endTime} | Kelas ${schedule.classGroup}`
 }
+const witaTimeFormatter = new Intl.DateTimeFormat("id-ID", {
+  timeZone: "Asia/Makassar",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hour12: false
+})
+
+const updateLiveWitaTime = () => {
+  liveWitaTime.value = witaTimeFormatter.format(new Date())
+}
+
 const resolvedBaseUrl = computed(() => API_URL)
 const checkInUrl = computed(() => {
   if (!activeSession.value || !resolvedBaseUrl.value) {
@@ -93,7 +108,7 @@ const autoStatus = computed<AttendanceStatus>(() => {
     return "hadir"
   }
 
-  return currentWitaTime.value <= selectedCourse.value.cutoffTime ? "hadir" : "terlambat"
+  return currentWitaMinute.value <= selectedCourse.value.cutoffTime ? "hadir" : "terlambat"
 })
 
 const statusClass = (status: AttendanceStatus) => {
@@ -312,7 +327,23 @@ await loadAttendance()
 
 if (attendance.value) {
   resetForm()
+  liveWitaTime.value = attendance.value.currentWitaTime
 }
+
+if (import.meta.client) {
+  updateLiveWitaTime()
+}
+
+onMounted(() => {
+  updateLiveWitaTime()
+  liveClockTimer = window.setInterval(updateLiveWitaTime, 1000)
+})
+
+onBeforeUnmount(() => {
+  if (liveClockTimer) {
+    clearInterval(liveClockTimer)
+  }
+})
 </script>
 
 <template>
