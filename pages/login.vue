@@ -40,19 +40,6 @@ const login = async () => {
         <p class="helper-text">Gunakan akun yang terdaftar untuk membuka sesi kelas, memantau kehadiran, dan melihat rekap presensi mahasiswa.</p>
       </div>
 
-      <div class="login-story-grid">
-        <article class="login-story-card">
-          <span class="story-label">Akses Cepat</span>
-          <strong>Buka sesi kelas dan pantau kehadiran</strong>
-          <p>Masuk sebagai admin untuk mengelola sesi aktif, check-in, dan koreksi data presensi mahasiswa.</p>
-        </article>
-        <article class="login-story-card login-story-card-accent">
-          <span class="story-label">Hari Ini</span>
-          <strong>Dashboard real-time siap dipakai</strong>
-          <p>Setelah login, Anda bisa langsung melihat jam sistem, sesi aktif, dan ringkasan kehadiran terbaru.</p>
-        </article>
-      </div>
-
       <div class="login-form-block">
         <div class="form-grid">
           <label class="field field-wide">
