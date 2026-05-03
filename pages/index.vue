@@ -322,9 +322,6 @@ if (attendance.value) {
 
 <template>
   <main class="page-shell">
-    <div style="background:red;color:white;padding:10px">
-      API: {{ import.meta.env.VITE_API_URL }}
-    </div>
     <p v-if="errorMessage && !attendance" class="status-error">{{ errorMessage }}</p>
     <section class="hero-card">
       <div class="hero-copy-block">
