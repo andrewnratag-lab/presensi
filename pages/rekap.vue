@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { apiFetch, buildApiUrl } from "~/composables/useBackendApi"
+
 definePageMeta({
   middleware: "auth"
 })
@@ -14,7 +16,7 @@ const loadReport = async () => {
   loading.value = true
 
   try {
-    report.value = await $fetch("/api/report", {
+    report.value = await apiFetch("/api/report", {
       query: {
         courseKey: filters.courseKey,
         attendanceDate: filters.attendanceDate
@@ -30,7 +32,7 @@ const exportCsv = () => {
     courseKey: filters.courseKey,
     attendanceDate: filters.attendanceDate
   })
-  window.location.href = `/api/export/attendance.csv?${query.toString()}`
+  window.location.href = buildApiUrl(`/api/export/attendance.csv?${query.toString()}`)
 }
 
 const printPdf = () => {

@@ -1,11 +1,6 @@
 export default defineNuxtConfig({
   compatibilityDate: "2026-04-30",
   css: ["~/assets/css/main.css"],
-  runtimeConfig: {
-    public: {
-      appBaseUrl: process.env.NUXT_PUBLIC_APP_BASE_URL || ""
-    }
-  },
   devtools: {
     enabled: true
   },

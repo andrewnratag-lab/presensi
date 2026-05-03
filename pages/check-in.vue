@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { apiFetch } from "~/composables/useBackendApi"
+
 interface MataKuliahItem {
   id: number
   nama: string
@@ -46,13 +48,13 @@ const loadSession = async () => {
 
   try {
     const [sessionResponse, mataKuliahResponse] = await Promise.all([
-      $fetch("/api/checkin", {
+      apiFetch("/api/checkin", {
         timeout: REQUEST_TIMEOUT_MS,
         query: {
           token: token.value
         }
       }),
-      $fetch<MataKuliahItem[]>("/api/matkul", {
+      apiFetch<MataKuliahItem[]>("/api/matkul", {
         timeout: REQUEST_TIMEOUT_MS
       })
     ])
@@ -74,7 +76,7 @@ const submitCheckIn = async () => {
   successMessage.value = ""
 
   try {
-    await $fetch("/api/checkin", {
+    await apiFetch("/api/checkin", {
       method: "POST",
       body: {
         token: token.value,

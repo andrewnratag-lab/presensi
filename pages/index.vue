@@ -4,8 +4,8 @@ definePageMeta({
 })
 
 import type { AttendancePayload, AttendanceStatus } from "~/types/attendance"
+import { API_URL, apiFetch, buildApiUrl, isNetworkFailure } from "~/composables/useBackendApi"
 
-const config = useRuntimeConfig()
 const attendance = ref<AttendancePayload | null>(null)
 const currentUser = ref<{ username: string; name: string; role: string } | null>(null)
 const saving = ref(false)
@@ -70,33 +70,13 @@ const selectedCourse = computed(() => schedules.value.find((item) => item.key ==
 const courseOptionLabel = (schedule: AttendancePayload["schedules"][number]) => {
   return `${schedule.label} | ${schedule.day}, ${schedule.startTime}-${schedule.endTime} | Kelas ${schedule.classGroup}`
 }
-const resolvedBaseUrl = computed(() => {
-  const configuredBaseUrl = String(config.public.appBaseUrl || "").trim()
-
-  if (configuredBaseUrl) {
-    return configuredBaseUrl.replace(/\/$/, "")
-  }
-
-  if (!import.meta.client) {
-    return ""
-  }
-
-  return window.location.origin
-})
-const baseUrlNeedsAttention = computed(() => {
-  if (!import.meta.client) {
-    return false
-  }
-
-  const hostname = window.location.hostname
-  return hostname === "localhost" || hostname === "127.0.0.1"
-})
+const resolvedBaseUrl = computed(() => API_URL)
 const checkInUrl = computed(() => {
   if (!activeSession.value || !resolvedBaseUrl.value) {
     return ""
   }
 
-  return `${resolvedBaseUrl.value}/check-in?token=${activeSession.value.token}`
+  return buildApiUrl(`/check-in?token=${encodeURIComponent(activeSession.value.token)}`)
 })
 const qrImageUrl = computed(() => {
   if (!checkInUrl.value) {
@@ -149,10 +129,15 @@ const clearFilters = () => {
 
 async function fetchDashboard() {
   try {
-    return await $fetch<AttendancePayload>("/api/dashboard", {
+    return await apiFetch<AttendancePayload>("/api/dashboard", {
       timeout: REQUEST_TIMEOUT_MS
     })
-  } catch {
+  } catch (error) {
+    if (!isNetworkFailure(error)) {
+      throw error
+    }
+
+    console.error("[dashboard] Falling back to safe payload after network failure.", error)
     return createDashboardFallback()
   }
 }
@@ -161,7 +146,7 @@ const loadAttendance = async () => {
   errorMessage.value = ""
 
   try {
-    const session = await $fetch<{ user: { username: string; name: string; role: string } | null }>("/api/auth/session", {
+    const session = await apiFetch<{ user: { username: string; name: string; role: string } | null }>("/api/auth/session", {
       timeout: REQUEST_TIMEOUT_MS
     })
     currentUser.value = session.user
@@ -197,7 +182,7 @@ const loadAttendance = async () => {
 }
 
 const logout = async () => {
-  await $fetch("/api/auth/logout", {
+  await apiFetch("/api/auth/logout", {
     method: "POST"
   })
   await navigateTo("/login")
@@ -220,7 +205,7 @@ const activateSession = async (courseKey: string) => {
   saving.value = true
 
   try {
-    attendance.value = await $fetch<AttendancePayload>("/api/attendance", {
+    attendance.value = await apiFetch<AttendancePayload>("/api/attendance", {
       method: "POST",
       body: {
         action: "open-session",
@@ -243,7 +228,7 @@ const closeSession = async () => {
   saving.value = true
 
   try {
-    attendance.value = await $fetch<AttendancePayload>("/api/attendance", {
+    attendance.value = await apiFetch<AttendancePayload>("/api/attendance", {
       method: "POST",
       body: {
         action: "close-session"
@@ -282,7 +267,7 @@ const saveAttendance = async () => {
   saving.value = true
 
   try {
-    attendance.value = await $fetch<AttendancePayload>("/api/attendance", {
+    attendance.value = await apiFetch<AttendancePayload>("/api/attendance", {
       method: "POST",
       body: {
         ...form,
@@ -308,7 +293,7 @@ const removeAttendance = async (id: number) => {
   saving.value = true
 
   try {
-    attendance.value = await $fetch<AttendancePayload>("/api/attendance", {
+    attendance.value = await apiFetch<AttendancePayload>("/api/attendance", {
       method: "POST",
       body: {
         id,
@@ -337,6 +322,9 @@ if (attendance.value) {
 
 <template>
   <main class="page-shell">
+    <div style="background:red;color:white;padding:10px">
+      API: {{ import.meta.env.VITE_API_URL }}
+    </div>
     <p v-if="errorMessage && !attendance" class="status-error">{{ errorMessage }}</p>
     <section class="hero-card">
       <div class="hero-copy-block">
@@ -434,10 +422,6 @@ if (attendance.value) {
             <div class="session-qr-copy">
               <strong>QR / Link Check-In Mahasiswa</strong>
               <p class="helper-text">Posisikan QR ini di layar depan kelas atau bagikan link berikut agar mahasiswa bisa check-in mandiri dengan lebih cepat.</p>
-              <p v-if="baseUrlNeedsAttention" class="status-error">
-                Dashboard masih dibuka lewat localhost. Untuk handphone, akses aplikasi dari IP laptop/server
-                yang satu jaringan atau set `NUXT_PUBLIC_APP_BASE_URL` ke URL yang bisa diakses handphone.
-              </p>
               <a class="helper-link" :href="checkInUrl" target="_blank">{{ checkInUrl }}</a>
             </div>
           </div>

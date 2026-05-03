@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import { apiFetch } from "~/composables/useBackendApi"
+
 definePageMeta({
   middleware: "auth"
 })
 
 const route = useRoute()
-const report = await $fetch("/api/report", {
+const report = await apiFetch("/api/report", {
   query: {
     courseKey: String(route.query.courseKey || ""),
     attendanceDate: String(route.query.attendanceDate || "")

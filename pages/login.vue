@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { apiFetch } from "~/composables/useBackendApi"
+
 definePageMeta({
   middleware: "guest"
 })
@@ -13,7 +15,7 @@ const login = async () => {
   loading.value = true
 
   try {
-    await $fetch("/api/auth/login", {
+    await apiFetch("/api/auth/login", {
       method: "POST",
       body: {
         username: username.value,
