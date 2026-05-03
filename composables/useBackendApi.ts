@@ -88,3 +88,28 @@ export const apiFetch = <T>(path: string, options?: Parameters<typeof $fetch<T>>
 export const useBackendApi = <T>(path: string, options?: Parameters<typeof $fetch<T>>[1]) => {
   return apiFetch<T>(path, options)
 }
+
+export const getApiErrorMessage = (error: unknown, fallbackMessage: string) => {
+  if (!error || typeof error !== "object") {
+    return fallbackMessage
+  }
+
+  const apiError = error as {
+    message?: string
+    statusMessage?: string
+    data?: {
+      message?: string
+      statusMessage?: string
+      error?: {
+        message?: string
+      }
+    }
+  }
+
+  return apiError.data?.error?.message
+    || apiError.data?.message
+    || apiError.data?.statusMessage
+    || apiError.statusMessage
+    || apiError.message
+    || fallbackMessage
+}

@@ -4,7 +4,7 @@ definePageMeta({
 })
 
 import type { AttendancePayload, AttendanceStatus } from "~/types/attendance"
-import { API_URL, apiFetch, buildApiUrl, isNetworkFailure } from "~/composables/useBackendApi"
+import { API_URL, apiFetch, buildApiUrl, getApiErrorMessage, isNetworkFailure } from "~/composables/useBackendApi"
 
 const attendance = ref<AttendancePayload | null>(null)
 const currentUser = ref<{ username: string; name: string; role: string } | null>(null)
@@ -175,9 +175,10 @@ const loadAttendance = async () => {
         || attendance.value.schedules[0].key
     }
   } catch (error: any) {
-    errorMessage.value = error?.data?.statusMessage
-      || error?.statusMessage
-      || "Server presensi tidak bisa dijangkau. Pastikan aplikasi production sedang berjalan di server."
+    errorMessage.value = getApiErrorMessage(
+      error,
+      "Server presensi tidak bisa dijangkau. Pastikan aplikasi production sedang berjalan di server."
+    )
   }
 }
 
@@ -216,7 +217,7 @@ const activateSession = async (courseKey: string) => {
     form.attendanceDate = attendance.value.todayDate
     successMessage.value = "Sesi presensi kelas berhasil dibuka."
   } catch (error: any) {
-    errorMessage.value = error?.data?.statusMessage || error?.statusMessage || "Gagal membuka sesi presensi."
+    errorMessage.value = getApiErrorMessage(error, "Gagal membuka sesi presensi.")
   } finally {
     saving.value = false
   }
@@ -237,7 +238,7 @@ const closeSession = async () => {
     successMessage.value = "Sesi presensi berhasil ditutup."
     resetForm()
   } catch (error: any) {
-    errorMessage.value = error?.data?.statusMessage || error?.statusMessage || "Gagal menutup sesi presensi."
+    errorMessage.value = getApiErrorMessage(error, "Gagal menutup sesi presensi.")
   } finally {
     saving.value = false
   }
@@ -281,7 +282,7 @@ const saveAttendance = async () => {
       : "Presensi mahasiswa berhasil disimpan."
     resetForm()
   } catch (error: any) {
-    errorMessage.value = error?.data?.statusMessage || error?.statusMessage || "Gagal menyimpan presensi mahasiswa."
+    errorMessage.value = getApiErrorMessage(error, "Gagal menyimpan presensi mahasiswa.")
   } finally {
     saving.value = false
   }
@@ -307,7 +308,7 @@ const removeAttendance = async (id: number) => {
 
     successMessage.value = "Data presensi mahasiswa berhasil dihapus."
   } catch (error: any) {
-    errorMessage.value = error?.data?.statusMessage || error?.statusMessage || "Gagal menghapus presensi mahasiswa."
+    errorMessage.value = getApiErrorMessage(error, "Gagal menghapus presensi mahasiswa.")
   } finally {
     saving.value = false
   }

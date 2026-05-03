@@ -31,6 +31,24 @@ const shouldUseSsl = (connectionString: string) => {
   return !isLocalConnection(connectionString)
 }
 
+const runSchemaStep = async (label: string, action: () => Promise<void>, options: { required?: boolean } = {}) => {
+  try {
+    await action()
+  } catch (error) {
+    const metadata = {
+      step: label,
+      error: serializeError(error)
+    }
+
+    if (options.required) {
+      logError("PostgreSQL schema step failed", metadata)
+      throw error
+    }
+
+    logInfo("PostgreSQL schema step skipped", metadata)
+  }
+}
+
 const columnExists = async (tableName: string, columnName: string) => {
   const database = getPool()
   const result = await database.query<{ exists: boolean }>(`
@@ -177,58 +195,68 @@ const ensureAttendanceSessionColumns = async () => {
 const createSchema = async () => {
   const database = getPool()
 
-  await database.query(`
-    CREATE TABLE IF NOT EXISTS attendance_records (
-      id SERIAL PRIMARY KEY,
-      employee_name TEXT NOT NULL,
-      employee_id TEXT NOT NULL DEFAULT '',
-      department TEXT NOT NULL DEFAULT 'Operasional',
-      course_key TEXT NOT NULL DEFAULT 'general',
-      course_label TEXT NOT NULL DEFAULT 'Kuliah Umum',
-      cutoff_time TEXT NOT NULL DEFAULT '10:00',
-      attendance_date TEXT NOT NULL,
-      check_in_time TEXT NOT NULL,
-      status TEXT NOT NULL,
-      notes TEXT NOT NULL DEFAULT '',
-      created_at TEXT NOT NULL
-    );
-  `)
+  await runSchemaStep("create attendance_records table", async () => {
+    await database.query(`
+      CREATE TABLE IF NOT EXISTS attendance_records (
+        id SERIAL PRIMARY KEY,
+        employee_name TEXT NOT NULL,
+        employee_id TEXT NOT NULL DEFAULT '',
+        department TEXT NOT NULL DEFAULT 'Operasional',
+        course_key TEXT NOT NULL DEFAULT 'general',
+        course_label TEXT NOT NULL DEFAULT 'Kuliah Umum',
+        cutoff_time TEXT NOT NULL DEFAULT '10:00',
+        attendance_date TEXT NOT NULL,
+        check_in_time TEXT NOT NULL,
+        status TEXT NOT NULL,
+        notes TEXT NOT NULL DEFAULT '',
+        created_at TEXT NOT NULL
+      );
+    `)
+  }, { required: true })
 
-  await database.query(`
-    CREATE TABLE IF NOT EXISTS attendance_sessions (
-      id SERIAL PRIMARY KEY,
-      course_key TEXT NOT NULL,
-      course_label TEXT NOT NULL,
-      attendance_date TEXT NOT NULL,
-      lecturer TEXT NOT NULL DEFAULT '',
-      class_group TEXT NOT NULL DEFAULT '',
-      session_token TEXT NOT NULL DEFAULT '',
-      started_at TEXT NOT NULL,
-      closed_at TEXT,
-      status TEXT NOT NULL DEFAULT 'open'
-    );
-  `)
+  await runSchemaStep("create attendance_sessions table", async () => {
+    await database.query(`
+      CREATE TABLE IF NOT EXISTS attendance_sessions (
+        id SERIAL PRIMARY KEY,
+        course_key TEXT NOT NULL,
+        course_label TEXT NOT NULL,
+        attendance_date TEXT NOT NULL,
+        lecturer TEXT NOT NULL DEFAULT '',
+        class_group TEXT NOT NULL DEFAULT '',
+        session_token TEXT NOT NULL DEFAULT '',
+        started_at TEXT NOT NULL,
+        closed_at TEXT,
+        status TEXT NOT NULL DEFAULT 'open'
+      );
+    `)
+  }, { required: true })
 
-  await ensureAttendanceRecordColumns()
-  await ensureAttendanceSessionColumns()
+  await runSchemaStep("ensure attendance_records columns", ensureAttendanceRecordColumns, { required: true })
+  await runSchemaStep("ensure attendance_sessions columns", ensureAttendanceSessionColumns, { required: true })
 
-  await database.query(`
-    CREATE UNIQUE INDEX IF NOT EXISTS attendance_records_unique_student_id_idx
-    ON attendance_records (lower(employee_id), attendance_date, course_key)
-    WHERE employee_id <> '';
-  `)
+  await runSchemaStep("create attendance_records_unique_student_id_idx", async () => {
+    await database.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS attendance_records_unique_student_id_idx
+      ON attendance_records (lower(employee_id), attendance_date, course_key)
+      WHERE employee_id <> '';
+    `)
+  })
 
-  await database.query(`
-    CREATE UNIQUE INDEX IF NOT EXISTS attendance_records_unique_student_name_idx
-    ON attendance_records (lower(employee_name), attendance_date, course_key)
-    WHERE employee_id = '';
-  `)
+  await runSchemaStep("create attendance_records_unique_student_name_idx", async () => {
+    await database.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS attendance_records_unique_student_name_idx
+      ON attendance_records (lower(employee_name), attendance_date, course_key)
+      WHERE employee_id = '';
+    `)
+  })
 
-  await database.query(`
-    CREATE UNIQUE INDEX IF NOT EXISTS attendance_sessions_open_token_idx
-    ON attendance_sessions (session_token)
-    WHERE status = 'open';
-  `)
+  await runSchemaStep("create attendance_sessions_open_token_idx", async () => {
+    await database.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS attendance_sessions_open_token_idx
+      ON attendance_sessions (session_token)
+      WHERE status = 'open';
+    `)
+  })
 }
 
 const getPool = () => {
