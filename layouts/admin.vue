@@ -40,6 +40,7 @@ const activeNavigation = computed(() => {
 const reportNavigation = computed(() => {
   return navigationItems.find((item) => item.to === "/rekap") || navigationItems[1]
 })
+const uiBuildVersion = "UI v2026-05-03-1035"
 
 const iconPaths: Record<string, string> = {
   home: "M3 10.75 12 3l9 7.75v9.25a1 1 0 0 1-1 1h-5.5v-6.5h-5V21H4a1 1 0 0 1-1-1z",
@@ -136,6 +137,7 @@ const logout = async () => {
           <p class="eyebrow admin-header-eyebrow">Panel Admin</p>
           <strong>{{ activeNavigation.label }}</strong>
           <small>{{ activeNavigation.caption }}</small>
+          <span class="admin-build-badge">{{ uiBuildVersion }}</span>
         </div>
 
         <div class="admin-header-actions">
@@ -166,6 +168,7 @@ const logout = async () => {
       </header>
 
       <div class="admin-quick-nav" aria-label="Navigasi cepat">
+        <div class="admin-build-chip">{{ uiBuildVersion }}</div>
         <NuxtLink
           v-for="item in navigationItems"
           :key="`quick-${item.to}`"
