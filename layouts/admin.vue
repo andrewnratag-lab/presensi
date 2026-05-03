@@ -165,6 +165,32 @@ const logout = async () => {
         </div>
       </header>
 
+      <div class="admin-quick-nav" aria-label="Navigasi cepat">
+        <NuxtLink
+          v-for="item in navigationItems"
+          :key="`quick-${item.to}`"
+          :to="item.to"
+          class="admin-quick-link"
+          :class="{ active: route.path === item.to }"
+        >
+          <span class="admin-nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path :d="getIconPath(item.icon)" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
+          <span>{{ item.label }}</span>
+        </NuxtLink>
+
+        <button class="admin-quick-logout" :disabled="loggingOut" @click="logout">
+          <span class="admin-nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path :d="getIconPath('logout')" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
+          <span>{{ loggingOut ? "Keluar..." : "Logout" }}</span>
+        </button>
+      </div>
+
       <div class="admin-content">
         <slot />
       </div>
