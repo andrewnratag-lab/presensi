@@ -142,7 +142,7 @@ button:disabled {
   grid-template-columns: 264px minmax(0, 1fr);
   gap: 20px;
   min-height: 100vh;
-  padding: 20px;
+  padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
 }
 
 .admin-sidebar,
@@ -319,6 +319,9 @@ button:disabled {
   gap: 1rem;
   padding: 1rem 1.2rem;
   border-radius: 24px;
+  position: sticky;
+  top: max(12px, env(safe-area-inset-top));
+  z-index: 5;
 }
 
 .admin-header-copy {
@@ -578,6 +581,7 @@ h2 {
   background: rgba(255, 255, 255, 0.06);
   color: var(--text);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  max-width: 100%;
 }
 
 .hero-stats,
@@ -1199,6 +1203,10 @@ table td:last-child .action-button {
     padding: 0.9rem 1rem;
   }
 
+  .hero-copy-block {
+    gap: 1.1rem;
+  }
+
   .admin-header-chip {
     display: none;
   }
@@ -1221,11 +1229,12 @@ table td:last-child .action-button {
 @media (max-width: 720px) {
   .admin-shell {
     gap: 12px;
-    padding: 12px;
+    padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
   }
 
   .admin-header {
     border-radius: 20px;
+    top: max(8px, env(safe-area-inset-top));
   }
 
   .admin-header-copy strong {
@@ -1250,8 +1259,50 @@ table td:last-child .action-button {
   }
 
   h1 {
-    font-size: clamp(2rem, 10vw, 3rem);
-    max-width: none;
+    font-size: clamp(2rem, 9vw, 2.8rem);
+    line-height: 1;
+    max-width: 10ch;
+  }
+
+  .hero-card {
+    gap: 1rem;
+  }
+
+  .hero-copy {
+    font-size: 0.98rem;
+    line-height: 1.8;
+  }
+
+  .hero-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+
+  .hero-chip {
+    min-height: 48px;
+    justify-content: flex-start;
+    padding: 0.75rem 0.95rem;
+    border-radius: 18px;
+    text-align: left;
+    white-space: normal;
+    line-height: 1.45;
+  }
+
+  .hero-stats {
+    gap: 0.85rem;
+  }
+
+  .stat-card {
+    padding: 1rem;
+  }
+
+  .stat-card strong {
+    font-size: 1.75rem;
+  }
+
+  .stat-card small {
+    line-height: 1.6;
   }
 
   .login-form-block {
@@ -1283,6 +1334,10 @@ table td:last-child .action-button {
     flex: 1 1 calc(50% - 0.5rem);
   }
 
+  .section-heading {
+    gap: 0.6rem;
+  }
+
   .field-wide {
     grid-column: auto;
   }
@@ -1296,6 +1351,16 @@ table td:last-child .action-button {
   .session-banner {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+@media (max-width: 560px) {
+  .hero-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-header-copy .eyebrow {
+    font-size: 0.68rem;
   }
 }
 
