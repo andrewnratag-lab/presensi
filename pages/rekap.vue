@@ -2,7 +2,8 @@
 import { apiFetch, buildApiUrl } from "~/composables/useBackendApi"
 
 definePageMeta({
-  middleware: "auth"
+  middleware: "auth",
+  layout: "admin"
 })
 
 const report = ref<{ records: any[]; schedules: any[]; filters: { courseKey: string; attendanceDate: string } } | null>(null)
@@ -55,7 +56,6 @@ await loadReport()
           <p class="helper-text">Filter rekap lalu ekspor ke Excel atau cetak ke PDF.</p>
         </div>
         <div class="hero-actions recap-actions">
-          <NuxtLink class="button-secondary link-button" to="/">Balik ke Dashboard</NuxtLink>
           <button class="button-primary" @click="exportCsv">Export Excel (CSV)</button>
           <button class="button-secondary" @click="printPdf">Cetak PDF</button>
         </div>

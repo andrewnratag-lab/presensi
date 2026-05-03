@@ -1,6 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
-  middleware: "auth"
+  middleware: "auth",
+  layout: "admin"
 })
 
 import type { AttendancePayload, AttendanceStatus } from "~/types/attendance"
@@ -12,7 +13,7 @@ const saving = ref(false)
 const errorMessage = ref("")
 const successMessage = ref("")
 const isEditing = ref(false)
-const REQUEST_TIMEOUT_MS = 8000
+const REQUEST_TIMEOUT_MS = 20000
 
 const createDashboardFallback = (): AttendancePayload & { error: true } => ({
   records: [],
@@ -180,13 +181,6 @@ const loadAttendance = async () => {
       "Server presensi tidak bisa dijangkau. Pastikan aplikasi production sedang berjalan di server."
     )
   }
-}
-
-const logout = async () => {
-  await apiFetch("/api/auth/logout", {
-    method: "POST"
-  })
-  await navigateTo("/login")
 }
 
 const resetForm = () => {
@@ -383,19 +377,6 @@ if (attendance.value) {
 
     <section class="content-grid">
       <div class="stack">
-        <section class="panel">
-          <div class="section-heading">
-            <div>
-              <h2>Panel Operator</h2>
-              <p class="helper-text">Akses cepat untuk melihat rekap, memantau sesi, dan keluar dari sistem.</p>
-            </div>
-            <div class="hero-actions operator-actions">
-              <NuxtLink class="button-secondary link-button" to="/rekap">Lihat Rekap Presensi</NuxtLink>
-              <button class="button-secondary" @click="logout">Logout</button>
-            </div>
-          </div>
-        </section>
-
         <section class="panel">
           <div class="section-heading">
             <div>

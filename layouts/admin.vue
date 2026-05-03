@@ -1,0 +1,194 @@
+<script setup lang="ts">
+import { apiFetch } from "~/composables/useBackendApi"
+
+const route = useRoute()
+const drawerOpen = ref(false)
+const loggingOut = ref(false)
+const authCookie = useCookie<string | null>("presensi_auth")
+
+const navigationItems = [
+  {
+    to: "/",
+    label: "Dashboard",
+    caption: "Sesi dan presensi",
+    icon: "home"
+  },
+  {
+    to: "/rekap",
+    label: "Rekap Presensi",
+    caption: "Laporan dan ekspor",
+    icon: "report"
+  }
+] as const
+
+const parseCurrentUser = () => {
+  if (!authCookie.value) {
+    return null
+  }
+
+  try {
+    return JSON.parse(authCookie.value) as { username: string; name: string; role: string }
+  } catch {
+    return null
+  }
+}
+
+const currentUser = computed(() => parseCurrentUser())
+const activeNavigation = computed(() => {
+  return navigationItems.find((item) => item.to === route.path) || navigationItems[0]
+})
+
+const iconPaths: Record<string, string> = {
+  home: "M3 10.75 12 3l9 7.75v9.25a1 1 0 0 1-1 1h-5.5v-6.5h-5V21H4a1 1 0 0 1-1-1z",
+  report: "M7 3.75A1.75 1.75 0 0 1 8.75 2h5.69c.46 0 .9.18 1.22.5l4.34 4.34c.32.32.5.76.5 1.22v12.19A1.75 1.75 0 0 1 18.75 22h-10A1.75 1.75 0 0 1 7 20.25zM14 3.5v3.25c0 .69.56 1.25 1.25 1.25h3.25M9.5 12h7m-7 3h7m-7-6h3.5",
+  logout: "M10.5 4.75a1 1 0 0 1 1-1h5.75A1.75 1.75 0 0 1 19 5.5v13a1.75 1.75 0 0 1-1.75 1.75H11.5a1 1 0 1 1 0-2h5.5V5.75h-5.5a1 1 0 0 1-1-1m-4.8 6.55 2.6-2.6a1 1 0 1 1 1.4 1.4L8.8 11H14a1 1 0 1 1 0 2H8.8l.9.9a1 1 0 1 1-1.4 1.4l-2.6-2.6a1 1 0 0 1 0-1.4"
+}
+
+const getIconPath = (icon: string) => iconPaths[icon] || iconPaths.report
+
+const closeDrawer = () => {
+  drawerOpen.value = false
+}
+
+watch(() => route.fullPath, closeDrawer)
+
+const logout = async () => {
+  loggingOut.value = true
+
+  try {
+    await apiFetch("/api/auth/logout", {
+      method: "POST"
+    })
+    authCookie.value = null
+    closeDrawer()
+    await navigateTo("/login")
+  } finally {
+    loggingOut.value = false
+  }
+}
+</script>
+
+<template>
+  <div class="admin-shell">
+    <aside class="admin-sidebar">
+      <div class="admin-brand">
+        <div class="admin-brand-mark">SI</div>
+        <div class="admin-brand-copy">
+          <strong>Presensi Mahasiswa</strong>
+          <span>Sistem Informasi</span>
+        </div>
+      </div>
+
+      <nav class="admin-nav" aria-label="Navigasi admin">
+        <NuxtLink
+          v-for="item in navigationItems"
+          :key="item.to"
+          :to="item.to"
+          class="admin-nav-item"
+          :class="{ active: route.path === item.to }"
+        >
+          <span class="admin-nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path :d="getIconPath(item.icon)" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
+          <span class="admin-nav-copy">
+            <strong>{{ item.label }}</strong>
+            <small>{{ item.caption }}</small>
+          </span>
+        </NuxtLink>
+      </nav>
+
+      <div class="admin-sidebar-footer">
+        <div class="admin-user-card">
+          <span class="admin-user-role">{{ currentUser?.role || "admin" }}</span>
+          <strong>{{ currentUser?.name || "Pengguna" }}</strong>
+          <small>{{ currentUser?.username || "presensi_auth" }}</small>
+        </div>
+
+        <button class="button-secondary admin-logout-button" :disabled="loggingOut" @click="logout">
+          <span class="admin-nav-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path :d="getIconPath('logout')" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
+          <span>{{ loggingOut ? "Keluar..." : "Logout" }}</span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="admin-main">
+      <header class="admin-header">
+        <button class="admin-menu-button" type="button" aria-label="Buka menu" @click="drawerOpen = true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <div class="admin-header-copy">
+          <p class="eyebrow admin-header-eyebrow">Panel Admin</p>
+          <strong>{{ activeNavigation.label }}</strong>
+        </div>
+
+        <div class="hero-chip admin-header-chip">{{ currentUser?.name || "Pengguna" }}</div>
+      </header>
+
+      <div class="admin-content">
+        <slot />
+      </div>
+    </div>
+
+    <Transition name="admin-drawer">
+      <div v-if="drawerOpen" class="admin-drawer-layer">
+        <button class="admin-drawer-backdrop" type="button" aria-label="Tutup menu" @click="closeDrawer"></button>
+        <aside class="admin-drawer">
+          <div class="admin-brand admin-brand-mobile">
+            <div class="admin-brand-mark">SI</div>
+            <div class="admin-brand-copy">
+              <strong>Presensi Mahasiswa</strong>
+              <span>Sistem Informasi</span>
+            </div>
+          </div>
+
+          <nav class="admin-nav" aria-label="Navigasi admin mobile">
+            <NuxtLink
+              v-for="item in navigationItems"
+              :key="`mobile-${item.to}`"
+              :to="item.to"
+              class="admin-nav-item"
+              :class="{ active: route.path === item.to }"
+              @click="closeDrawer"
+            >
+              <span class="admin-nav-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path :d="getIconPath(item.icon)" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+              <span class="admin-nav-copy">
+                <strong>{{ item.label }}</strong>
+                <small>{{ item.caption }}</small>
+              </span>
+            </NuxtLink>
+          </nav>
+
+          <div class="admin-sidebar-footer">
+            <div class="admin-user-card">
+              <span class="admin-user-role">{{ currentUser?.role || "admin" }}</span>
+              <strong>{{ currentUser?.name || "Pengguna" }}</strong>
+              <small>{{ currentUser?.username || "presensi_auth" }}</small>
+            </div>
+
+            <button class="button-secondary admin-logout-button" :disabled="loggingOut" @click="logout">
+              <span class="admin-nav-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path :d="getIconPath('logout')" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+              <span>{{ loggingOut ? "Keluar..." : "Logout" }}</span>
+            </button>
+          </div>
+        </aside>
+      </div>
+    </Transition>
+  </div>
+</template>
