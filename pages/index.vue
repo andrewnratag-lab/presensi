@@ -323,6 +323,21 @@ const removeAttendance = async (id: number) => {
   }
 }
 
+const logout = async () => {
+  saving.value = true
+
+  try {
+    await apiFetch("/api/auth/logout", {
+      method: "POST"
+    })
+    const authCookie = useCookie<string | null>("presensi_auth")
+    authCookie.value = null
+    await navigateTo("/login")
+  } finally {
+    saving.value = false
+  }
+}
+
 await loadAttendance()
 
 if (attendance.value) {
@@ -411,6 +426,9 @@ onBeforeUnmount(() => {
         <span class="story-label">Rekap Presensi</span>
         <strong>Lihat laporan dan ekspor data kelas</strong>
         <p>Buka halaman rekap untuk memfilter presensi per mata kuliah, per tanggal, lalu ekspor CSV atau cetak PDF.</p>
+        <div class="story-actions">
+          <NuxtLink to="/rekap" class="link-button button-primary">Buka Rekap</NuxtLink>
+        </div>
       </article>
       <article class="story-card">
         <span class="story-label">Aturan Kelas</span>
@@ -421,6 +439,11 @@ onBeforeUnmount(() => {
         <span class="story-label">Logout</span>
         <strong>Keluar akun dengan cepat dan aman</strong>
         <p>Gunakan tombol logout di navigasi atas untuk menutup sesi admin setelah selesai mengelola presensi.</p>
+        <div class="story-actions">
+          <button class="button-danger" :disabled="saving" @click="logout">
+            {{ saving ? "Keluar..." : "Logout" }}
+          </button>
+        </div>
       </article>
     </section>
 
