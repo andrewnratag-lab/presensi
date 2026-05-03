@@ -358,11 +358,29 @@ onBeforeUnmount(() => {
           dan ringkasan kelas yang langsung terbaca untuk admin akademik maupun dosen.
         </p>
 
+        <div class="hero-focus-grid">
+          <article class="hero-focus-card">
+            <span class="story-label">Sesi Saat Ini</span>
+            <strong>{{ activeSession ? activeSession.courseLabel : "Belum ada sesi aktif" }}</strong>
+            <p>
+              {{ activeSession
+                ? `${activeSession.lecturer} - kelas ${activeSession.classGroup} - ${activeSession.attendanceDate}`
+                : "Pilih salah satu jadwal hari ini untuk mulai membuka sesi presensi kelas." }}
+            </p>
+          </article>
+
+          <article class="hero-focus-card hero-focus-time">
+            <span class="story-label">Waktu Sistem</span>
+            <strong>{{ currentWitaTime }}</strong>
+            <p>{{ currentDayName || "Hari belum tersedia" }} - {{ timezoneLabel }}</p>
+          </article>
+        </div>
+
         <div class="hero-actions">
-          <div class="hero-chip">{{ currentUser?.name || "Pengguna" }}</div>
+          <div class="hero-chip hero-chip-primary">{{ currentUser?.name || "Pengguna" }}</div>
           <div class="hero-chip">Zona waktu {{ timezoneLabel }}</div>
           <div class="hero-chip">Hari {{ currentDayName }}</div>
-          <div class="hero-chip">Jam aktif {{ currentWitaTime }}</div>
+          <div class="hero-chip hero-chip-accent">Jam aktif {{ currentWitaTime }}</div>
           <div class="hero-chip">Postgres cloud</div>
         </div>
       </div>
@@ -373,15 +391,15 @@ onBeforeUnmount(() => {
           <strong>{{ summary?.todayTotal ?? 0 }}</strong>
           <small>Total mahasiswa yang sudah check-in pada tanggal perkuliahan aktif.</small>
         </article>
-        <article class="stat-card">
+        <article class="stat-card stat-good">
           <span>Hadir</span>
           <strong>{{ summary?.hadirToday ?? 0 }}</strong>
         </article>
-        <article class="stat-card">
+        <article class="stat-card stat-warn">
           <span>Terlambat</span>
           <strong>{{ summary?.lateToday ?? 0 }}</strong>
         </article>
-        <article class="stat-card">
+        <article class="stat-card stat-neutral">
           <span>Fakultas Aktif</span>
           <strong>{{ summary?.activeFaculties ?? 0 }}</strong>
         </article>

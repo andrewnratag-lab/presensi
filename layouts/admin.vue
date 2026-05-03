@@ -76,6 +76,10 @@ const logout = async () => {
         <div class="admin-brand-copy">
           <strong>Presensi Mahasiswa</strong>
           <span>Sistem Informasi</span>
+          <small class="admin-brand-status">
+            <span class="admin-brand-status-dot" aria-hidden="true"></span>
+            Sistem aktif
+          </small>
         </div>
       </div>
 
@@ -128,9 +132,10 @@ const logout = async () => {
         <div class="admin-header-copy">
           <p class="eyebrow admin-header-eyebrow">Panel Admin</p>
           <strong>{{ activeNavigation.label }}</strong>
+          <small>{{ activeNavigation.caption }}</small>
         </div>
 
-        <div class="hero-chip admin-header-chip">{{ currentUser?.name || "Pengguna" }}</div>
+        <div class="hero-chip admin-header-chip">{{ currentUser?.role || "admin" }}</div>
       </header>
 
       <div class="admin-content">
@@ -147,6 +152,10 @@ const logout = async () => {
             <div class="admin-brand-copy">
               <strong>Presensi Mahasiswa</strong>
               <span>Sistem Informasi</span>
+              <small class="admin-brand-status">
+                <span class="admin-brand-status-dot" aria-hidden="true"></span>
+                Sistem aktif
+              </small>
             </div>
           </div>
 
